@@ -22,8 +22,17 @@ root@server:~# apt install build-essential vim ssh git python3 python3-pip ethto
 // ubuntu 24.01 version python3 package install
 root@server:~# apt install python3-aiohttp python3-async-timeout
 
-// docker install
-root@server:~# apt install podman-docker
+// docker install (https://docs.docker.com/engine/install/ubuntu/, https://velog.io/@jay13jeong/arm-ubuntu-%EB%8F%84%EC%BB%A4%EC%84%A4%EC%B9%98)
+##1
+root@server:~# apt update
+root@server:~# apt install apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+root@server:~# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
+root@server:~# apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
+root@server:~# apt update
+root@server:~# apt install docker-ce
 
 // system reboot
 root@server:~# reboot
