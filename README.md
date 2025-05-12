@@ -7,13 +7,6 @@
 * WeatherBoardZero Wiki : https://wiki.odroid.com/accessory/sensor/weather_board_zero
 * Audio amplifier board for ODROID-C5 Wiki : https://wiki.odroid.com/internal/accessory/add-on_board/audio_amplifier_board#software_setup
 
-### MeloTTS
-* Github : https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md#python-api
-* Docker 파일 수정 및 추가사항
-  - RUN pip install --upgrade pip
-  - RUN pip install cached_path==1.1.3 botocore==1.29.76
-  - CMD ["/bin/bash"] 
-   
 ### Install package
 ```
 // ubuntu package install
@@ -22,17 +15,28 @@ root@server:~# apt install build-essential vim ssh git python3 python3-pip ethto
 // ubuntu 24.01 version python3 package install
 root@server:~# apt install python3-aiohttp python3-async-timeout
 
-// docker install (https://docs.docker.com/engine/install/ubuntu/, https://velog.io/@jay13jeong/arm-ubuntu-%EB%8F%84%EC%BB%A4%EC%84%A4%EC%B9%98)
-##1
-root@server:~# apt update
-root@server:~# apt install apt-transport-https \
+// *** Docker Install ***
+// 필수 패키지 설치
+root@server:~# apt install -y \
     ca-certificates \
     curl \
-    software-properties-common
-root@server:~# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
-root@server:~# apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
-root@server:~# apt update
-root@server:~# apt install docker-ce
+    gnupg \
+    lsb-release
+
+// Docker 공식 GPG 키 추가
+root@server:~# mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+// Docker 리포지터리 추가 (arm64 지원 포함)
+root@server:~# echo \
+  "deb [arch=arm64 signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+// Docker 엔진설치
+root@server:~# apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 // system reboot
 root@server:~# reboot
@@ -41,6 +45,24 @@ root@server:~# uname -a
 Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +0000 aarch64 aarch64 aarch64 GNU/Linux
 
 ```
+
+### MeloTTS
+* Github : https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md#python-api
+* Docker 파일 수정 및 추가사항
+  - RUN pip install --upgrade pip
+  - RUN pip install cached_path==1.1.3 botocore==1.29.76
+  - CMD ["/bin/bash"]
+* Docker Build (kernel network package가 정상적으로 설치되지 않은 경우)
+  - docker build --network=host -t melotts .
+
+* Docker 실행 (output folder공유)
+  - mkdir output
+  - docker run --rm --network=host -it -v $(pwd):/app melotts # 컨테이너 종료시 삭제
+
+* Docker Image/Container 삭제
+  - docker rm -f $(docker ps -aq)           # 모든 컨테이너 삭제
+  - docker rmi -f $(docker images -q)       # 모든 이미지 삭제
+  - docker volume prune -f 
 
 ### Github setting
 ```
@@ -91,12 +113,20 @@ card 0: AMLAUGESOUND [AML-AUGESOUND], device 3: SPDIF-dummy-alsaPORT-spdif soc:d
   Subdevices: 1/1
   Subdevice #0: subdevice #0
 
-// config mixer (mute off)
-root@server:~# amixer sset 'TDMOUT_C Mute' off
-
-// audio board setup
+// audio board setup wiki
 https://wiki.odroid.com/internal/accessory/add-on_board/audio_amplifier_board#software_setup
-
+```
+// h/w mute disable
+root@server:~# echo 488 > /sys/class/gpio/export
+root@server:~# echo out > /sys/class/gpio/gpio488/direction
+root@server:~# echo 1 > /sys/class/gpio/gpio488/value
+// config mixer (mute off)
+root@server:~# amixer -c0 set 'TDMOUT_C Mute' off
+```
+Simple mixer control 'TDMOUT_C Mute',0
+  Capabilities: pswitch pswitch-joined
+  Playback channels: Mono
+  Mono: Playback [off]
 ```
 
 * Sound test (Sign-wave 1Khz)
