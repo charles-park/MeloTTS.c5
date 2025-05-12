@@ -56,7 +56,7 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
 ```
 
 ### MeloTTS
-* Github : https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md#python-api
+* Github : https://github.com/myshell-ai/MeloTTS
 * Docker 파일 수정 및 추가사항
   - RUN pip install --upgrade pip
   - RUN pip install cached_path==1.1.3 botocore==1.29.76
