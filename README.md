@@ -38,6 +38,15 @@ root@server:~# echo \
 // Docker 엔진설치
 root@server:~# apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+// Docker network(iptable) 관련설정이 없거나 지원하지 않는 경우(ODROID-C5는 지원하지 않음)
+// 이 경우 docker실행시 --network=host명령을 주어 host의 network을 사용하도록 함.
+root@server:~# mkdir -p /etc/docker
+root@server:~# tee /etc/docker/daemon.json > /dev/null <<EOF
+{
+  "iptables": false
+}
+EOF
+
 // system reboot
 root@server:~# reboot
 
@@ -55,8 +64,7 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
 * Docker Build (kernel network package가 정상적으로 설치되지 않은 경우)
   - docker build --network=host -t melotts .
 
-* Docker 실행 (output folder공유)
-  - mkdir output
+* Docker 실행 (실행폴더를 공유함)
   - docker run --rm --network=host -it -v $(pwd):/app melotts # 컨테이너 종료시 삭제
 
 * Docker Image/Container 삭제
