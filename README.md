@@ -113,20 +113,19 @@ card 0: AMLAUGESOUND [AML-AUGESOUND], device 3: SPDIF-dummy-alsaPORT-spdif soc:d
   Subdevices: 1/1
   Subdevice #0: subdevice #0
 
-// audio board setup wiki
-https://wiki.odroid.com/internal/accessory/add-on_board/audio_amplifier_board#software_setup
-```
+// audio board setup wiki : https://wiki.odroid.com/internal/accessory/add-on_board/audio_amplifier_board#software_setup
 // h/w mute disable
 root@server:~# echo 488 > /sys/class/gpio/export
 root@server:~# echo out > /sys/class/gpio/gpio488/direction
 root@server:~# echo 1 > /sys/class/gpio/gpio488/value
+
 // config mixer (mute off)
 root@server:~# amixer -c0 set 'TDMOUT_C Mute' off
-```
 Simple mixer control 'TDMOUT_C Mute',0
   Capabilities: pswitch pswitch-joined
   Playback channels: Mono
   Mono: Playback [off]
+
 ```
 
 * Sound test (Sign-wave 1Khz)
