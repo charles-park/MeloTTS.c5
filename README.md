@@ -65,7 +65,10 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
   - docker build --network=host -t melotts .
 
 * Docker 실행 (실행폴더를 공유함)
-  - docker run --rm --network=host -it -v $(pwd):/app melotts # 컨테이너 종료시 삭제
+  - docker run --rm --network=host -it -v $(pwd):/app melotts.c5 # 컨테이너 종료시 삭제
+
+* Docker 종료
+  - [Ctrl + D]
 
 * Docker Image/Container 삭제
   - docker rm -f $(docker ps -aq)           # 모든 컨테이너 삭제
