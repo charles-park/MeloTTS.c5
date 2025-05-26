@@ -65,7 +65,7 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
   - docker build --network=host -t melotts .
 
 * Docker 실행 (실행폴더를 공유함)
-  - docker run --rm --network=host -it -v $(pwd):/app melotts.c5 # 컨테이너 종료시 삭제
+  - docker run --rm --network=host -it -v $(pwd):/app melotts.c5 [in.txt] [out.wav] # 컨테이너 종료시 삭제
 
 * Docker 종료
   - [Ctrl + D]
@@ -125,7 +125,7 @@ card 0: AMLAUGESOUND [AML-AUGESOUND], device 3: SPDIF-dummy-alsaPORT-spdif soc:d
   Subdevice #0: subdevice #0
 
 // audio board setup wiki : https://wiki.odroid.com/internal/accessory/add-on_board/audio_amplifier_board#software_setup
-// h/w mute disable
+// h/w mute disable:q
 root@server:~# echo 488 > /sys/class/gpio/export
 root@server:~# echo out > /sys/class/gpio/gpio488/direction
 root@server:~# echo 1 > /sys/class/gpio/gpio488/value
