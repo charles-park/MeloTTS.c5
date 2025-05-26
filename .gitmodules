@@ -1,0 +1,3 @@
+[submodule "weather.app/lib_weather"]
+	path = weather.app/lib_weather
+	url = https://github.com/charles-park/lib_weather

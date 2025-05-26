@@ -13,5 +13,6 @@ RUN pip install -e .
 RUN python -m unidic download
 RUN python melo/init_downloads.py
 
-CMD ["python", "./mk_speech.py"]
+# CMD ["python", "./mk_speech.py"]
 # CMD ["/bin/bash"]
+ENTRYPOINT ["python", "./mk_speech.py"]
