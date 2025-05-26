@@ -62,7 +62,7 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
   - RUN pip install cached_path==1.1.3 botocore==1.29.76
   - CMD ["/bin/bash"]
 * Docker Build (kernel network package가 정상적으로 설치되지 않은 경우)
-  - docker build --network=host -t melotts .
+  - docker build --no-cache --network=host -t melotts .
 
 * Docker 실행 (실행폴더를 공유함)
   - docker run --rm --network=host -it -v $(pwd):/app melotts [in.txt] [out.wav] # 컨테이너 종료시 삭제
@@ -70,10 +70,14 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
 * Docker 종료
   - [Ctrl + D]
 
-* Docker Image/Container 삭제
-  - docker rm -f $(docker ps -aq)           # 모든 컨테이너 삭제
-  - docker rmi -f $(docker images -q)       # 모든 이미지 삭제
-  - docker volume prune -f 
+* 중지된 모든 컨테이너 삭제
+  - docker container prune -f
+
+* 사용되지 않는 이미지 삭제
+  - docker image prune -a -f
+
+* 사용되지 않는 모든 데이터 삭제 (볼륨, 네트워크 포함 주의!)
+  - docker system prune -a -f --volumes
 
 ### Github setting
 ```
