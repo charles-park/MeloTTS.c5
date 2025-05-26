@@ -10,7 +10,7 @@
 ### Install package
 ```
 // ubuntu package install
-root@server:~# apt install build-essential vim ssh git python3 python3-pip ethtool net-tools usbutils i2c-tools overlayroot nmap evtest htop cups cups-bsd iperf3 alsa 
+root@server:~# apt install build-essential vim ssh git python3 python3-pip ethtool net-tools usbutils i2c-tools overlayroot nmap evtest htop cups cups-bsd iperf3 alsa libcurl4-openssl-dev libcjson-dev
 
 // ubuntu 24.01 version python3 package install
 root@server:~# apt install python3-aiohttp python3-async-timeout
@@ -56,7 +56,7 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
 ```
 
 ### MeloTTS
-* Github : https://github.com/myshell-ai/MeloTTS
+* Github : https://github.com/myshell-ai/MeloTTS (https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md)
 * Docker 파일 수정 및 추가사항
   - RUN pip install --upgrade pip
   - RUN pip install cached_path==1.1.3 botocore==1.29.76
@@ -80,13 +80,13 @@ root@server:~# git config --global user.name "charles-park"
 
 ### Clone the reopsitory with submodule
 ```
-root@server:~# git clone -b client.v20 --recursive https://github.com/charles-park/JIG.Client
+root@server:~# git clone --recursive https://github.com/charles-park/melotts.c5
 
 or
 
-root@server:~# git clone -b client.v20 https://github.com/charles-park/JIG.Client
-root@server:~# cd JIG.Client
-root@server:~/JIG.Client# git submodule update --init --recursive
+root@server:~# git clone https://github.com/charles-park/melotts.c5
+root@server:~# cd melotts.c5
+root@server:~/melotts.c5# git submodule update --init --recursive
 ```
 
 ### Auto login
