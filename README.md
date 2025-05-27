@@ -154,8 +154,71 @@ root@server:~/melotts.c5/weather.app/MeloTTS.lib#
 
 * Docker 실행 (실행폴더를 공유함)
   - docker run --rm --network=host -it -v $(pwd):/app melotts [in.txt] [out.wav] # 컨테이너 종료시 삭제
+```
+root@server:~/melotts.c5/weather.app/MeloTTS.lib# docker run --rm --network=host -it -v $(pwd):/app melotts
+tokenizer_config.json: 100%|███████████████████| 251/251 [00:00<00:00, 28.2kB/s]
+vocab.txt: 100%|█████████████████████████████| 231k/231k [00:00<00:00, 1.29MB/s]
+tokenizer_config.json: 100%|█████████████████| 48.0/48.0 [00:00<00:00, 6.91kB/s]
+config.json: 100%|██████████████████████████████| 570/570 [00:00<00:00, 339kB/s]
+vocab.txt: 100%|█████████████████████████████| 232k/232k [00:00<00:00, 11.2MB/s]
+tokenizer.json: 100%|████████████████████████| 466k/466k [00:00<00:00, 2.53MB/s]
+tokenizer_config.json: 100%|█████████████████| 48.0/48.0 [00:00<00:00, 28.2kB/s]
+config.json: 100%|██████████████████████████████| 625/625 [00:00<00:00, 409kB/s]
+vocab.txt: 100%|█████████████████████████████| 872k/872k [00:00<00:00, 4.38MB/s]
+tokenizer.json: 100%|██████████████████████| 1.72M/1.72M [00:00<00:00, 8.77MB/s]
+tokenizer_config.json: 100%|█████████████████| 80.0/80.0 [00:00<00:00, 48.7kB/s]
+config.json: 100%|██████████████████████████████| 725/725 [00:00<00:00, 453kB/s]
+vocab.txt: 100%|█████████████████████████████| 344k/344k [00:00<00:00, 1.89MB/s]
+tokenizer_config.json: 100%|█████████████████| 83.0/83.0 [00:00<00:00, 12.0kB/s]
+config.json: 100%|██████████████████████████████| 420/420 [00:00<00:00, 253kB/s]
+vocab.txt: 100%|█████████████████████████████| 227k/227k [00:00<00:00, 61.9MB/s]
+tokenizer_config.json: 100%|███████████████████| 310/310 [00:00<00:00, 71.4kB/s]
+config.json: 100%|██████████████████████████████| 650/650 [00:00<00:00, 399kB/s]
+vocab.txt: 100%|█████████████████████████████| 248k/248k [00:00<00:00, 1.36MB/s]
+tokenizer.json: 100%|████████████████████████| 486k/486k [00:00<00:00, 37.1MB/s]
+special_tokens_map.json: 100%|█████████████████| 134/134 [00:00<00:00, 81.9kB/s]
+***********************************
+input text filename =  
+output wav filename =  error.wav
+***********************************
+날씨 정보가 없습니다.
+***********************************
+config.json: 100%|██████████████████████████| 3.40k/3.40k [00:00<00:00, 490kB/s]
+/usr/local/lib/python3.9/site-packages/torch/nn/utils/weight_norm.py:143: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+checkpoint.pth: 100%|████████████████████████| 208M/208M [00:02<00:00, 99.3MB/s]
+ > Text split to sentences.
+날씨 정보가 없습니다.
+ > ===========================
+  0%|                                                     | 0/1 [00:00<?, ?it/s]you have to install python-mecab-ko. install it...
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+Collecting python-mecab-ko
+  Downloading python_mecab_ko-1.3.7-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (3.4 kB)
+Collecting python-mecab-ko-dic (from python-mecab-ko)
+  Downloading python_mecab_ko_dic-2.1.1.post2-py3-none-any.whl.metadata (1.4 kB)
+Downloading python_mecab_ko-1.3.7-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (560 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 560.6/560.6 kB 13.7 MB/s eta 0:00:00
+Downloading python_mecab_ko_dic-2.1.1.post2-py3-none-any.whl (34.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 34.5/34.5 MB 26.8 MB/s eta 0:00:00
+Installing collected packages: python-mecab-ko-dic, python-mecab-ko
+Successfully installed python-mecab-ko-1.3.7 python-mecab-ko-dic-2.1.1.post2
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+pytorch_model.bin: 100%|█████████████████████| 476M/476M [00:04<00:00, 97.5MB/s]
+Some weights of the model checkpoint at kykim/bert-kor-base were not used when initializing BertForMaskedLM: ['cls.seq_relationship.weight', 'cls.seq_relationship.bias']
+- This IS expected if you are initializing BertForMaskedLM from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForMaskedLM from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+100%|█████████████████████████████████████████████| 1/1 [00:40<00:00, 40.25s/it]
 
-* Docker 종료
+# play test
+root@server:~/melotts.c5/weather.app/MeloTTS.lib# aplay -Dplughw:0,2 error.wav 
+Playing WAVE 'error.wav' : Signed 16 bit Little Endian, Rate 44100 Hz, Mono
+
+```
+
+* Docker 종료 (Docker Bash모드의 경우)
   - [Ctrl + D]
 
 * 중지된 모든 컨테이너 삭제
