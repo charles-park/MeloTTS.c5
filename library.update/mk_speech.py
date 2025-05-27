@@ -11,17 +11,19 @@ def read_text_file(filename, default="날씨 정보가 없습니다."):
 # 예시
 # kr_txt = read_text_file("kr.txt")
 # print(kr_txt)
-print("***********************************")
-print("input text filename = ", sys.argv[1])
-
-if len(sys.argv) == 3:
-    output_fname = sys.argv[2]
+if len(sys.argv) < 2:
+    input_fname = ""
+    output_fname = "error.wav"
 else:
-    output_fname = "out.wav"
+    input_fname = sys.argv[1]
+    if len (sys.argv) == 3:
+        output_fname = sys.argv[2]
 
+print("***********************************")
+print("input text filename = ", input_fname)
 print("output wav filename = ", output_fname)
 print("***********************************")
-kr_txt = read_text_file(sys.argv[1])
+kr_txt = read_text_file(input_fname)
 print(kr_txt)
 print("***********************************")
 
