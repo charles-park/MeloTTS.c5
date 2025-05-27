@@ -19,6 +19,12 @@
 
 #include "./lib_weather/lib_weather.h"
 
+#define MELO_TTS_PATH   "/root/MeloTTS.lib/"
+
+#define TODAY_TEXT      MELO_TTS_PATH"today.txt"
+#define TIME_TEXT       MELO_TTS_PATH"time.txt"
+#define WEATHER_TEXT    MELO_TTS_PATH"weather.txt"
+
 //------------------------------------------------------------------------------
 const char *PlayList[] = {
     "today",
@@ -33,12 +39,12 @@ int create_today_txt (void)
 {
     FILE *fp;
 
-    if ((fp = fopen ("today.txt", "wt")) != NULL) {
+    if ((fp = fopen (TODAY_TEXT, "wt")) != NULL) {
         fprintf (fp, "오늘은 %s년 ", date_to_kor (eDAY_YEAR, NULL));
         fprintf (fp, "%s월 ", date_to_kor (eDAY_MONTH, NULL));
         fprintf (fp, "%s일 ", date_to_kor (eDAY_DAY, NULL));
         fprintf (fp, "%s요일 입니다.\n", date_to_kor (eDAY_W_DAY, NULL));
-        fclose (fp);
+        fclose  (fp);
 
         printf ("오늘은 %s년 ", date_to_kor (eDAY_YEAR, NULL));
         printf ("%s월 ", date_to_kor (eDAY_MONTH, NULL));
@@ -46,7 +52,7 @@ int create_today_txt (void)
         printf ("%s요일 입니다.\n", date_to_kor (eDAY_W_DAY, NULL));
         return true;
     } else {
-        fprintf (stderr, "Can't create a file(%s).\n", __func__);
+        fprintf (stderr, "Can't create a file(%s:%s).\n", __func__, TODAY_TEXT);
         return false;
     }
 }
@@ -56,18 +62,18 @@ int create_time_txt (void)
 {
     FILE *fp;
 
-    if ((fp = fopen ("time.txt", "wt")) != NULL) {
+    if ((fp = fopen (TIME_TEXT, "wt")) != NULL) {
         fprintf (fp, "현재시간은 %s ", date_to_kor (eDAY_AM_PM, NULL));
         fprintf (fp, "%s시 ", date_to_kor (eDAY_HOUR, NULL));
         fprintf (fp, "%s분 입니다.\n", date_to_kor (eDAY_MIN, NULL));
-        fclose (fp);
+        fclose  (fp);
 
         printf ("현재시간은 %s ", date_to_kor (eDAY_AM_PM, NULL));
         printf ("%s시 ", date_to_kor (eDAY_HOUR, NULL));
         printf ("%s분 입니다.\n", date_to_kor (eDAY_MIN, NULL));
         return true;
     } else {
-        fprintf (stderr, "Can't create a file(%s).\n", __func__);
+        fprintf (stderr, "Can't create a file(%s:%s).\n", __func__, TIME_TEXT);
         return false;
     }
 }
@@ -77,20 +83,23 @@ int create_weather_txt (const char *cur_lobs)
 {
     FILE *fp;
     static char prev_lobs[WTTR_DATA_SIZE] = { 0, };
+    static double lati = 0, longi = 0;
     char city[WTTR_DATA_SIZE], country[WTTR_DATA_SIZE];
 
     /* 측정되어진 wttr 좌표 데이터*/
     printf ("Lati : %s, Longi : %s\n", get_wttr_data (eWTTR_LATITUDE), get_wttr_data (eWTTR_LONGITUDE));
 
-    if (strncmp (prev_lobs, cur_lobs, strlen (cur_lobs))) {
+    if (strncmp (prev_lobs, cur_lobs, strlen (cur_lobs)) ||
+        lati  != atof(get_wttr_data (eWTTR_LATITUDE))    ||
+        longi != atof(get_wttr_data (eWTTR_LONGITUDE)))    {
 
-        if ((fp = fopen ("weather.txt", "wt")) != NULL) {
-            strncpy (prev_lobs, cur_lobs, strlen (cur_lobs));
+        strncpy (prev_lobs, cur_lobs, strlen (cur_lobs));
+        lati  = atof(get_wttr_data (eWTTR_LATITUDE));
+        longi = atof(get_wttr_data (eWTTR_LONGITUDE));
+
+        if ((fp = fopen (WEATHER_TEXT, "wt")) != NULL) {
             /* 좌표기준으로 위치 검색 */
-            get_location_json (
-                atof(get_wttr_data (eWTTR_LATITUDE)),
-                atof(get_wttr_data (eWTTR_LONGITUDE)),
-                city, country, 1);
+            get_location_json (lati, longi, city, country, 1);
 
             /*
                 날씨 재생 Format
@@ -101,7 +110,7 @@ int create_weather_txt (const char *cur_lobs)
             */
             fprintf (fp, "%s %s 날씨를 알려드립니다.\n", country, city);
             fprintf (fp, "현재 날씨는 %s 입니다.\n", translate_weather_code( get_wttr_data (eWTTR_W_CODE), 1 ));
-            fprintf (fp, "온도는 %s도 ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP))));
+            fprintf (fp, "온도는 %s도, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP))));
             fprintf (fp, "체감온도는 %s도 이며, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP_FEEL))));
             fprintf (fp, "습도는 %s퍼센트, ", int_to_kor (atoi( get_wttr_data (eWTTR_HUMIDUTY))));
             fprintf (fp, "바람은 %s쪽으로, ", translate_wind_degree ( get_wttr_data (eWTTR_WIND_DIR), 1 ));
@@ -109,7 +118,7 @@ int create_weather_txt (const char *cur_lobs)
             if (atoi(get_wttr_data (eWTTR_PRECIPI)) > 0)
                 fprintf (fp, "강수량은 %s밀리미터 입니다.\n", int_to_kor (atoi( get_wttr_data (eWTTR_PRECIPI))));
 
-            fclose (fp);
+            fclose  (fp);
             return true;
         }
     }
