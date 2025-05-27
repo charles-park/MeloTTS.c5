@@ -55,30 +55,6 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +000
 
 ```
 
-### MeloTTS
-* Github : https://github.com/myshell-ai/MeloTTS (https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md)
-* Docker 파일 수정 및 추가사항
-  - RUN pip install --upgrade pip
-  - RUN pip install cached_path==1.1.3 botocore==1.29.76
-  - CMD ["/bin/bash"]
-* Docker Build (kernel network package가 정상적으로 설치되지 않은 경우)
-  - docker build --no-cache --network=host -t melotts .
-
-* Docker 실행 (실행폴더를 공유함)
-  - docker run --rm --network=host -it -v $(pwd):/app melotts [in.txt] [out.wav] # 컨테이너 종료시 삭제
-
-* Docker 종료
-  - [Ctrl + D]
-
-* 중지된 모든 컨테이너 삭제
-  - docker container prune -f
-
-* 사용되지 않는 이미지 삭제
-  - docker image prune -a -f
-
-* 사용되지 않는 모든 데이터 삭제 (볼륨, 네트워크 포함 주의!)
-  - docker system prune -a -f --volumes
-
 ### Github setting
 ```
 root@server:~# git config --global user.email "charles.park@hardkernel.com"
@@ -95,6 +71,101 @@ root@server:~# git clone https://github.com/charles-park/melotts.c5
 root@server:~# cd melotts.c5
 root@server:~/melotts.c5# git submodule update --init --recursive
 ```
+
+
+### MeloTTS
+* Github : https://github.com/myshell-ai/MeloTTS (https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md)
+    - git clone https://github.com/myshell-ai/MeloTTS MeloTTS.lib
+
+* Docker 파일 수정 및 추가사항 (library.update folder안에 있는 모든 파일을 MeloTTS lib폴더안에 복사한다.)
+  - RUN pip install --upgrade pip
+  - RUN pip install cached_pa#
+  - RUN pip install nltk
+  - COPY nltk_data /app
+  - ENV NLTK_DATA=/app/nltk_datath==1.34.88 botocore==1.6.2
+  - ENTRYPOINT ["python", "./mk_speech.py"]
+
+* RUN python melo/init_downloads.py를 주석처리(리소스부족의 문제로 nlk_data는 먼저 다운로드 하도록한다.)
+```
+#
+# ARM64에서 Docker image 작업중 nlk_data 다운로드시 리소스 문제로 정상적으로 동작하지 않는 경우가 생김
+#
+# RUN python melo/init_downloads.py
+#
+# init_downloads문제가 발생하여 수동으로 먼저 다운로드 후 PATH를 설정하여 사용하도록 수정함.
+#
+
+# nltk_data는 docker root 즉 Docker file이 있는 폴더 아래에 반드시 존재하여야 함.
+# 따라서 melo clone한 디렉토리 안에서 아래와 같이 실행하여 다운로드 함
+#
+# apt install python3 python3-pip
+# pip install nltk
+# mkdir -p ./nltk_data
+# python3 -m nltk.downloader -d ./nltk_data cmudict
+
+root@server:~/melotts.c5/weather.app/MeloTTS.lib# pip install nltk
+root@server:~/melotts.c5/weather.app/MeloTTS.lib# mkdir -p ./nltk_data
+root@server:~/melotts.c5/weather.app/MeloTTS.lib# python3 -m nltk.downloader -d ./nltk_data cmudict
+```
+
+* Docker Build (kernel network package가 정상적으로 설치되지 않은 경우)
+  - docker build --no-cache --network=host -t melotts .
+
+```
+RUN python melo/init_downloads.pydocker build --no-cache --network=host -t melotts .
+
+[+] Building 777.0s (15/15) FINISHED                             docker:default
+ => [internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 1.14kB                                     0.0s
+ => [internal] load metadata for docker.io/library/python:3.9-slim         1.5s
+ => [internal] load .dockerignore                                          0.0s
+ => => transferring context: 2B                                            0.0s
+ => [internal] load build context                                          0.8s
+ => => transferring context: 33.88MB                                       0.7s
+ => [ 1/10] FROM docker.io/library/python:3.9-slim@sha256:aff2066ec8914f7  5.3s
+ => => resolve docker.io/library/python:3.9-slim@sha256:aff2066ec8914f738  0.0s
+ => => sha256:b16f1b16678093d11ecfece1004207a40f9bc1b7d 28.07MB / 28.07MB  0.7s
+ => => sha256:8a45c7e905d6f25747fdf1b9286ccaf78e53af421e8 3.33MB / 3.33MB  0.8s
+ => => sha256:831704bd2063f9c58ce466588a965a30256b1d6d5 14.84MB / 14.84MB  0.9s
+ => => sha256:aff2066ec8914f7383e115bbbcde4d24da428eac3 10.41kB / 10.41kB  0.0s
+ => => sha256:d10556fbb8b9849e3d1d281b7bcaad11a7adbeb4583 1.75kB / 1.75kB  0.0s
+ => => sha256:d0b3594cb4b0680adee2a52e50eaa169ce8048d3b41 5.30kB / 5.30kB  0.0s
+ => => sha256:2d211dd37fa2a9e4524173d4247c8b387b6696e2e36e528 249B / 249B  1.0s
+ => => extracting sha256:b16f1b16678093d11ecfece1004207a40f9bc1b7d9d1d16a  2.4s
+ => => extracting sha256:8a45c7e905d6f25747fdf1b9286ccaf78e53af421e86800b  0.2s
+ => => extracting sha256:831704bd2063f9c58ce466588a965a30256b1d6d54896244  1.3s
+ => => extracting sha256:2d211dd37fa2a9e4524173d4247c8b387b6696e2e36e5287  0.0s
+ => [ 2/10] WORKDIR /app                                                   1.8s
+ => [ 3/10] COPY . /app                                                    0.4s
+ => [ 4/10] RUN apt-get update && apt-get install -y     build-essential  38.3s
+ => [ 5/10] RUN pip install --upgrade pip                                 13.7s
+ => [ 6/10] RUN pip install cached_path==1.6.2 botocore==1.34.88         247.9s
+ => [ 7/10] RUN pip install -e .                                         389.5s
+ => [ 8/10] RUN python -m unidic download                                 31.8s
+ => [ 9/10] RUN pip install nltk                                           5.8s
+ => [10/10] COPY nltk_data /app                                            0.1s
+ => exporting to image                                                    40.7s
+ => => exporting layers                                                   40.7s
+ => => writing image sha256:ea131a4df0225d2148d881bc7fbd8aad5a1c4e6c00740  0.0s
+ => => naming to docker.io/library/melotts                                 0.0s
+
+root@server:~/melotts.c5/weather.app/MeloTTS.lib# 
+```
+
+* Docker 실행 (실행폴더를 공유함)
+  - docker run --rm --network=host -it -v $(pwd):/app melotts [in.txt] [out.wav] # 컨테이너 종료시 삭제
+
+* Docker 종료
+  - [Ctrl + D]
+
+* 중지된 모든 컨테이너 삭제
+  - docker container prune -f
+
+* 사용되지 않는 이미지 삭제
+  - docker image prune -a -f
+
+* 사용되지 않는 모든 데이터 삭제 (볼륨, 네트워크 포함 주의!)
+  - docker system prune -a -f --volumes
 
 ### Auto login
 ```
