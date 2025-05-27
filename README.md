@@ -10,10 +10,10 @@
 ### Install package
 ```
 // ubuntu package install
-root@server:~# apt install build-essential vim ssh git python3 python3-pip ethtool net-tools usbutils i2c-tools overlayroot nmap evtest htop cups cups-bsd iperf3 alsa libcurl4-openssl-dev libcjson-dev
+root@server:~# apt install build-essential vim ssh git python3 python3-pip ethtool net-tools usbutils i2c-tools overlayroot nmap evtest htop cups cups-bsd iperf3 alsa libcurl4-openssl-dev libcjson-dev tree
 
 // ubuntu 24.01 version python3 package install
-root@server:~# apt install python3-aiohttp python3-async-timeout
+root@server:~# pip install nltk
 
 // *** Docker Install ***
 // 필수 패키지 설치
