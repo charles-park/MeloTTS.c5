@@ -92,16 +92,26 @@ int create_weather_txt (const char *cur_lobs)
                 atof(get_wttr_data (eWTTR_LONGITUDE)),
                 city, country, 1);
 
-            fprintf (fp, "%s %s 현재 날씨를 알려드립니다.\n", country, city);
-
-            fprintf (fp, "현재시간은 %s ", date_to_kor (eDAY_AM_PM, NULL));
-
-
+            /*
+                날씨 재생 Format
+                대한민국 경기도 날씨를 알려드립니다.
+                현재 날씨는 맑은 입니다.
+                온도는 27도 체감온도는 26도 이며 습도는 65퍼센트 바람은 동남쪽으로 시속 1킬로미터로 붑니다.
+                강수량은 0밀리미터 입니다.
+            */
+            fprintf (fp, "%s %s 날씨를 알려드립니다.\n", country, city);
+            fprintf (fp, "현재 날씨는 %s 입니다.\n", translate_weather_code( get_wttr_data (eWTTR_W_CODE), 1 ));
+            fprintf (fp, "온도는 %s도 ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP))));
+            fprintf (fp, "체감온도는 %s도 이며, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP_FEEL))));
+            fprintf (fp, "습도는 %s퍼센트, ", int_to_kor (atoi( get_wttr_data (eWTTR_HUMIDUTY))));
+            fprintf (fp, "바람은 %s쪽으로, ", translate_wind_degree ( get_wttr_data (eWTTR_WIND_DIR), 1 ));
+            fprintf (fp, "시속 %s킬로미터로 붑니다.\n",  int_to_kor (atoi (get_wttr_data (eWTTR_WIND_SPEED))));
+            if (atoi(get_wttr_data (eWTTR_PRECIPI)) > 0)
+                fprintf (fp, "강수량은 %s밀리미터 입니다.\n", int_to_kor (atoi( get_wttr_data (eWTTR_PRECIPI))));
 
             fclose (fp);
             return true;
         }
-
     }
     return false;
 }
@@ -174,6 +184,7 @@ int main(int argc, char *argv[]) {
 
             create_today_txt ();
             create_time_txt  ();
+            create_weather_txt (get_wttr_data (eWTTR_LOBS_DATE));
         }
     }
     return 0;
