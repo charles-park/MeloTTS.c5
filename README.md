@@ -152,8 +152,28 @@ RUN python melo/init_downloads.pydocker build --no-cache --network=host -t melot
 root@server:~/melotts.c5/weather.app/MeloTTS.lib# 
 ```
 
-* Docker 실행 (실행폴더를 공유함)
-  - docker run --rm --network=host -it -v $(pwd):/app melotts [input=speech.txt] [output=default.wav] [language='EN'] [speed=1.0] # 컨테이너 종료시 삭제
+* Docker 실행 (실행폴더를 공유함, 컨테이너 종료시 삭제옵션 포함)
+  - docker run --rm --network=host -it -v $(pwd):/app melotts {options}
+
+```
+usage: mk_speech.py [-h] [-i [INPUT ...]] [-o [OUTPUT ...]] [-l [LANGUAGE ...]]
+                    [-s [SPEED ...]]
+
+mk_speech.py options
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i [INPUT ...], --input [INPUT ...]
+                        input filename : speech text
+  -o [OUTPUT ...], --output [OUTPUT ...]
+                        output filename {'default.wav'} : speech wav
+  -l [LANGUAGE ...], --language [LANGUAGE ...]
+                        language {'EN'} : speech language ['EN' or 'KR]
+  -s [SPEED ...], --speed [SPEED ...]
+                        speed {1.0} : speech speed
+    
+```
+    
 ```
 root@server:~/melotts.c5/weather.app/MeloTTS.lib# docker run --rm --network=host -it -v $(pwd):/app melotts
 tokenizer_config.json: 100%|███████████████████| 251/251 [00:00<00:00, 28.2kB/s]
