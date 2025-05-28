@@ -77,7 +77,7 @@ def read_text_file(filename, lang):
             return f.read()
     except FileNotFoundError:
         if (lang == 'EN'):
-            return "There is not the weather information."
+            return "There is no weather information."
         else :
             return "날씨 정보가 없습니다."
 
