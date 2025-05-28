@@ -26,6 +26,7 @@ from nltk.tag import PerceptronTagger
 import pickle  # pickle 임포트 필요함!
 
 #------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #
 # pickle read error fix.
 #
@@ -67,7 +68,7 @@ nltk.tag._get_tagger = lambda lang=None: PatchedPerceptronTagger()
 
 #------------------------------------------------------------------------------
 #
-# TEXT Read
+# TEXT Read function
 #
 #------------------------------------------------------------------------------
 def read_text_file(filename, lang):
@@ -86,52 +87,34 @@ def read_text_file(filename, lang):
 # argu info : 1st = input(text), 2nd = output(wav), 3rd = language ("EN" or "KR")
 #
 #------------------------------------------------------------------------------
-# default language
-language = "EN"
-speaker_id = "EN-US"
-output_fname = "default.wav"
-input_fname = ""
-speed = 1.0
+import argparse
 
-# input text
-if len(sys.argv) >= 2:
-    input_fname  = sys.argv[1]
+parser = argparse.ArgumentParser(description="mk_speech.py options")
+parser.add_argument("-i", "--input", nargs='*',  type=str, default="", help="input filename  : speech text")
+parser.add_argument("-o", "--output", nargs='*', type=str, default="default.wav", help="output filename {'default.wav'} : speech wav")
+parser.add_argument("-l", "--language", nargs='*', type=str, default="EN", help="language {'EN'} : speech language ['EN' or 'KR]")
+parser.add_argument("-s", "--speed", nargs='*', type=float, default=1.0, help="speed {1.0} : speech speed")
+
+args = parser.parse_args()
+
+input_fname = args.input
+
+if (args.language.upper() == "KR"):
+    language   = "KR"
+    speaker_id = "KR"
 else:
-    print ("Usage : mk_speech {in_text=default msg} {out_text=default.wav} {language='EN'} {speed=1.0}")
+    language   = "EN"
+    speaker_id = "EN-US"
 
-# output wav
-if len(sys.argv) >= 3:
-    output_fname = sys.argv[2]
-
-# speech language
-if len(sys.argv) >= 4:
-    if sys.argv[3].upper() == "KR":
-        language = "KR"
-        speaker_id = "KR"
-
-# speech language
-if len(sys.argv) >= 5:
-    try:
-        speed = float (sys.argv[4])
-    except ValueError:
-        speed = 1.0
+output_fname = args.output
+speed = args.speed
 
 #------------------------------------------------------------------------------
 #
-# Input param & read text print
+# File read
 #
 #------------------------------------------------------------------------------
-print("***********************************")
-print("language = ", language)
-print("speaker id = ", speaker_id)
-print("speech speed = ", speed)
-print("input text filename = ", input_fname)
-print("output wav filename = ", output_fname)
-print("***********************************")
 read_txt = read_text_file(input_fname, language)
-print("speech text")
-print(read_txt)
-print("***********************************")
 
 #------------------------------------------------------------------------------
 # Local download
@@ -149,6 +132,23 @@ device = 'cpu' # or cuda:0
 model = TTS(language, device=device)
 speaker_ids = model.hps.data.spk2id
 model.tts_to_file(read_txt, speaker_ids[speaker_id], output_fname, speed=speed)
+
+#------------------------------------------------------------------------------
+#
+# Input param & read text print
+#
+#------------------------------------------------------------------------------
+print("---------------------------------------")
+print("[ input param ]")
+print("language = ", language)
+print("speaker id = ", speaker_id)
+print("speech speed = ", speed)
+print("input text filename = ", input_fname)
+print("output wav filename = ", output_fname)
+print("---------------------------------------")
+print("[ speech text ]")
+print(read_txt)
+print("---------------------------------------")
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
