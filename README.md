@@ -105,7 +105,7 @@ root@server:~/melotts.c5# git submodule update --init --recursive
 
 root@server:~/melotts.c5/weather.app/MeloTTS.lib# pip install nltk
 root@server:~/melotts.c5/weather.app/MeloTTS.lib# mkdir -p ./nltk_data
-root@server:~/melotts.c5/weather.app/MeloTTS.lib# python3 -m nltk.downloader -d ./nltk_data cmudict
+root@server:~/melotts.c5/weather.app/MeloTTS.lib# python3 -m nltk.downloader -d ./nltk_data averaged_perceptron_tagger cmudict punkt wordnet
 ```
 
 * Docker Build (kernel network package가 정상적으로 설치되지 않은 경우)
@@ -153,7 +153,7 @@ root@server:~/melotts.c5/weather.app/MeloTTS.lib#
 ```
 
 * Docker 실행 (실행폴더를 공유함)
-  - docker run --rm --network=host -it -v $(pwd):/app melotts [in.txt] [out.wav] # 컨테이너 종료시 삭제
+  - docker run --rm --network=host -it -v $(pwd):/app melotts [input=speech.txt] [output=default.wav] [language='EN'] [speed=1.0] # 컨테이너 종료시 삭제
 ```
 root@server:~/melotts.c5/weather.app/MeloTTS.lib# docker run --rm --network=host -it -v $(pwd):/app melotts
 tokenizer_config.json: 100%|███████████████████| 251/251 [00:00<00:00, 28.2kB/s]
