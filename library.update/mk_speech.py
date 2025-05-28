@@ -90,16 +90,17 @@ def read_text_file(filename, lang):
 import argparse
 
 parser = argparse.ArgumentParser(description="mk_speech.py options")
-parser.add_argument("-i", "--input", nargs='*',  type=str, default="", help="input filename  : speech text")
-parser.add_argument("-o", "--output", nargs='*', type=str, default="default.wav", help="output filename {'default.wav'} : speech wav")
-parser.add_argument("-l", "--language", nargs='*', type=str, default="EN", help="language {'EN'} : speech language ['EN' or 'KR]")
-parser.add_argument("-s", "--speed", nargs='*', type=float, default=1.0, help="speed {1.0} : speech speed")
+parser.add_argument("-i", "--input",  type=str, default="", help="input filename  : speech text")
+parser.add_argument("-o", "--output", type=str, default="default.wav", help="output filename {'default.wav'} : speech wav")
+parser.add_argument("-l", "--language", type=str, default="EN", help="language {'EN'} : speech language ['EN' or 'KR]")
+parser.add_argument("-s", "--speed",  type=float, default=1.0, help="speed {1.0} : speech speed")
 
 args = parser.parse_args()
 
 input_fname = args.input
+language = args.language.upper()
 
-if (args.language.upper() == "KR"):
+if (language == "KR"):
     language   = "KR"
     speaker_id = "KR"
 else:
@@ -126,7 +127,6 @@ read_txt = read_text_file(input_fname, language)
 # model = TTS(language='EN', device=device)
 # speaker_id = 'KR' = TTS(language='KR', device=device)
 #------------------------------------------------------------------------------
-# Speed is adjustable
 device = 'cpu' # or cuda:0
 
 model = TTS(language, device=device)
