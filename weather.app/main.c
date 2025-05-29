@@ -15,15 +15,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <time.h>
+
+#include <pthread.h>
 
 #include "./lib_weather/lib_weather.h"
 
-#define MELO_TTS_PATH   "/root/MeloTTS.lib/"
+//------------------------------------------------------------------------------
+#define MELO_TTS_PATH       "/root/MeloTTS.lib/"
+#define AUDIO_THREAD_PATH   MELO_TTS_PATH
 
-#define TODAY_TEXT      MELO_TTS_PATH"today.txt"
-#define TIME_TEXT       MELO_TTS_PATH"time.txt"
-#define WEATHER_TEXT    MELO_TTS_PATH"weather.txt"
+#define TODAY_TEXT          MELO_TTS_PATH"today.txt"
+#define TIME_TEXT           MELO_TTS_PATH"time.txt"
+#define WEATHER_TEXT        MELO_TTS_PATH"weather.txt"
+
+#define STR_PATH_LENGTH     128
+#define MAKE_AUDIO_WAIT     200
 
 //------------------------------------------------------------------------------
 const char *PlayList[] = {
@@ -34,6 +42,125 @@ const char *PlayList[] = {
 
 enum { false = 0, true } bool;
 
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// thread control variable
+//------------------------------------------------------------------------------
+volatile int PlayAudioEnable = 0, MakeAudioEnable = 0;
+pthread_t AudioThread;
+
+void *play_audio_thread_func (void *arg)
+{
+    const char *fname = (const char *)arg;
+
+    FILE *fp;
+    char cmd [STR_PATH_LENGTH *2];
+
+    PlayAudioEnable = 1;
+
+    memset  (cmd, 0, sizeof(cmd));
+    sprintf (cmd, "aplay -Dplughw:0,2 %s%s.wav && sync", AUDIO_THREAD_PATH, fname);
+
+    if ((fp = popen (cmd, "w")) != NULL)
+        pclose(fp);
+
+    PlayAudioEnable = 0;    usleep (100 *1000);
+
+    return arg;
+}
+
+//------------------------------------------------------------------------------
+void play_audio_thread_stop (void)
+{
+    FILE *fp;
+    const char *cmd = "ps ax | grep aplay | awk '{print $1}' | xargs kill";
+
+    if ((fp = popen (cmd, "w")) != NULL)
+        pclose(fp);
+
+    PlayAudioEnable = 0;    usleep (100 *1000);
+}
+
+//------------------------------------------------------------------------------
+int play_audio (const char *fname, int wait_sec)
+{
+    while (PlayAudioEnable)     play_audio_thread_stop ();
+
+    pthread_create (&AudioThread, NULL, play_audio_thread_func, (void *)fname);
+    sleep (1);
+
+    while (wait_sec-- && PlayAudioEnable)   {
+        printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
+        sleep (1);
+    }
+
+    while (PlayAudioEnable)    play_audio_thread_stop ();
+
+    return wait_sec ? true : false;
+}
+
+//------------------------------------------------------------------------------
+#define DOCKER_CMD  "docker run --rm --network=host -it -v %s:/app melotts -i %s.txt -o %s.wav -l kr -s 1.0"
+
+void *make_audio_thread_func (void *arg)
+{
+    const char *fname = (const char *)arg;
+
+    FILE *fp;
+    char cmd [STR_PATH_LENGTH *2];
+
+    MakeAudioEnable = 1;
+
+    memset  (cmd, 0, sizeof(cmd));
+    sprintf (cmd, DOCKER_CMD, MELO_TTS_PATH, fname, fname);
+
+    if ((fp = popen (cmd, "r")) != NULL){
+        memset(cmd, 0, sizeof(cmd));
+        while (fgets(cmd, sizeof(cmd), fp)) {
+            if (strstr(cmd, "mk_speech complete") != NULL) {
+                printf ("\r\n%s : Docker mk_sppech.py complete!\r\n", __func__);
+                break;
+            }
+        }
+        pclose(fp);
+    }
+
+    MakeAudioEnable = 0;    usleep (100 *1000);
+
+    return arg;
+}
+
+//------------------------------------------------------------------------------
+void make_audio_thread_stop (void)
+{
+    FILE *fp;
+    const char *cmd = "ps ax | grep mk_speech.py | awk '{print $1}' | xargs kill";
+
+    if ((fp = popen (cmd, "w")) != NULL)
+        pclose(fp);
+
+    MakeAudioEnable = 0;    usleep (100 *1000);
+}
+
+//------------------------------------------------------------------------------
+int make_audio (const char *fname, int wait_sec)
+{
+    while (MakeAudioEnable)     make_audio_thread_stop ();
+
+    pthread_create (&AudioThread, NULL, make_audio_thread_func, (void *)fname);
+    sleep (1);
+
+    while (wait_sec-- && MakeAudioEnable)   {
+        printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
+        sleep (1);
+    }
+
+    while (MakeAudioEnable)    make_audio_thread_stop ();
+
+    return wait_sec ? true : false;
+}
+
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 int create_today_txt (void)
 {
@@ -50,7 +177,8 @@ int create_today_txt (void)
         printf ("%s월 ", date_to_kor (eDAY_MONTH, NULL));
         printf ("%s일 ", date_to_kor (eDAY_DAY, NULL));
         printf ("%s요일 입니다.\n", date_to_kor (eDAY_W_DAY, NULL));
-        return true;
+
+        return make_audio("today", MAKE_AUDIO_WAIT) ? true : false;
     } else {
         fprintf (stderr, "Can't create a file(%s:%s).\n", __func__, TODAY_TEXT);
         return false;
@@ -71,7 +199,8 @@ int create_time_txt (void)
         printf ("현재시간은 %s ", date_to_kor (eDAY_AM_PM, NULL));
         printf ("%s시 ", date_to_kor (eDAY_HOUR, NULL));
         printf ("%s분 입니다.\n", date_to_kor (eDAY_MIN, NULL));
-        return true;
+
+        return make_audio("time", MAKE_AUDIO_WAIT) ? true : false;
     } else {
         fprintf (stderr, "Can't create a file(%s:%s).\n", __func__, TIME_TEXT);
         return false;
@@ -119,7 +248,8 @@ int create_weather_txt (const char *cur_lobs)
                 fprintf (fp, "강수량은 %s밀리미터 입니다.\n", int_to_kor (atoi( get_wttr_data (eWTTR_PRECIPI))));
 
             fclose  (fp);
-            return true;
+
+            return make_audio("weather", MAKE_AUDIO_WAIT) ? true : false;
         }
     }
     return false;
@@ -194,6 +324,10 @@ int main(int argc, char *argv[]) {
             create_today_txt ();
             create_time_txt  ();
             create_weather_txt (get_wttr_data (eWTTR_LOBS_DATE));
+
+            play_audio ("today", 10);
+            play_audio ("time", 10);
+            play_audio ("weather", 30);
         }
     }
     return 0;
