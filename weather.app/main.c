@@ -90,7 +90,8 @@ int play_audio (const char *fname, int wait_sec)
     sleep (1);
 
     while (wait_sec-- && PlayAudioEnable)   {
-        printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
+        if ((wait_sec % 10) == 0 || (wait_sec < 10))
+            printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
         sleep (1);
     }
 
@@ -151,7 +152,8 @@ int make_audio (const char *fname, int wait_sec)
     sleep (1);
 
     while (wait_sec-- && MakeAudioEnable)   {
-        printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
+        if ((wait_sec % 10) == 0 || (wait_sec < 10))
+            printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
         sleep (1);
     }
 
@@ -161,10 +163,40 @@ int make_audio (const char *fname, int wait_sec)
 }
 
 //------------------------------------------------------------------------------
+void get_local_date (struct tm *get_lt)
+{
+    time_t t = time(NULL);
+    struct tm *lt;
+
+    setenv("TZ", "Asia/Seoul", 1);  // 타임존 설정
+    lt = localtime(&t);
+
+    // struct 내용 복사.
+    memcpy (get_lt, lt, sizeof(struct tm));
+}
+
 //------------------------------------------------------------------------------
 int create_today_txt (void)
 {
     FILE *fp;
+    struct tm lt;
+
+    /* 오늘이 몇 일인지(0~365) */
+    static int yday = -1;
+
+    /* 1번만 생성하기 위하여 현재 시간을 읽어와 날짜가 바뀌었는지 확인 */
+    get_local_date(&lt);
+
+    if (yday != -1) {
+        if (yday == lt.tm_yday) {
+            /* 모든 파일이 있는 경우에는 기존에 생성되었던 파일을 사용함. */
+            if (!access (MELO_TTS_PATH"today.txt", F_OK) && !access (MELO_TTS_PATH"today.wav", F_OK))
+                return true;
+
+            printf ("%stoday.* fine not found\n", MELO_TTS_PATH);
+        }
+    }
+    yday = lt.tm_yday;
 
     if ((fp = fopen (TODAY_TEXT, "wt")) != NULL) {
         fprintf (fp, "오늘은 %s년 ", date_to_kor (eDAY_YEAR, NULL));
@@ -212,7 +244,7 @@ int create_weather_txt (const char *cur_lobs)
 {
     FILE *fp;
     static char prev_lobs[WTTR_DATA_SIZE] = { 0, };
-    static double lati = 0, longi = 0;
+    static double lati = -1, longi = -1;
     char city[WTTR_DATA_SIZE], country[WTTR_DATA_SIZE];
 
     /* 측정되어진 wttr 좌표 데이터*/
@@ -237,27 +269,74 @@ int create_weather_txt (const char *cur_lobs)
                 온도는 27도 체감온도는 26도 이며 습도는 65퍼센트 바람은 동남쪽으로 시속 1킬로미터로 붑니다.
                 강수량은 0밀리미터 입니다.
             */
-            fprintf (fp, "%s %s 날씨를 알려드립니다.\n", country, city);
-            fprintf (fp, "현재 날씨는 %s 입니다.\n", translate_weather_code( get_wttr_data (eWTTR_W_CODE), 1 ));
-            fprintf (fp, "온도는 %s도, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP))));
-            fprintf (fp, "체감온도는 %s도 이며, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP_FEEL))));
-            fprintf (fp, "습도는 %s퍼센트, ", int_to_kor (atoi( get_wttr_data (eWTTR_HUMIDUTY))));
-            fprintf (fp, "바람은 %s쪽으로, ", translate_wind_degree ( get_wttr_data (eWTTR_WIND_DIR), 1 ));
-            fprintf (fp, "시속 %s킬로미터로 붑니다.\n",  int_to_kor (atoi (get_wttr_data (eWTTR_WIND_SPEED))));
-            if (atoi(get_wttr_data (eWTTR_PRECIPI)) > 0)
-                fprintf (fp, "강수량은 %s밀리미터 입니다.\n", int_to_kor (atoi( get_wttr_data (eWTTR_PRECIPI))));
+           fprintf (fp, "%s %s 날씨를 알려드립니다.\n", country, city);
+           fprintf (fp, "현재 날씨는 %s 입니다.\n", translate_weather_code( get_wttr_data (eWTTR_W_CODE), 1 ));
+           fprintf (fp, "온도는 %s도, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP))));
+           fprintf (fp, "체감온도는 %s도 이며, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP_FEEL))));
+           fprintf (fp, "습도는 %s퍼센트, ", int_to_kor (atoi( get_wttr_data (eWTTR_HUMIDUTY))));
+           fprintf (fp, "바람은 %s쪽으로, ", translate_wind_degree ( get_wttr_data (eWTTR_WIND_DIR), 1 ));
+           fprintf (fp, "시속 %s킬로미터로 붑니다.\n",  int_to_kor (atoi (get_wttr_data (eWTTR_WIND_SPEED))));
+           if (atoi(get_wttr_data (eWTTR_PRECIPI)) > 0)
+               fprintf (fp, "강수량은 %s밀리미터 입니다.\n", int_to_kor (atoi( get_wttr_data (eWTTR_PRECIPI))));
 
-            fclose  (fp);
+           fclose  (fp);
 
-            return make_audio("weather", MAKE_AUDIO_WAIT) ? true : false;
+           printf ("%s %s 날씨를 알려드립니다.\n", country, city);
+           printf ("현재 날씨는 %s 입니다.\n", translate_weather_code( get_wttr_data (eWTTR_W_CODE), 1 ));
+           printf ("온도는 %s도, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP))));
+           printf ("체감온도는 %s도 이며, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP_FEEL))));
+           printf ("습도는 %s퍼센트, ", int_to_kor (atoi( get_wttr_data (eWTTR_HUMIDUTY))));
+           printf ("바람은 %s쪽으로, ", translate_wind_degree ( get_wttr_data (eWTTR_WIND_DIR), 1 ));
+           printf ("시속 %s킬로미터로 붑니다.\n",  int_to_kor (atoi (get_wttr_data (eWTTR_WIND_SPEED))));
+           if (atoi(get_wttr_data (eWTTR_PRECIPI)) > 0)
+               printf ("강수량은 %s밀리미터 입니다.\n", int_to_kor (atoi( get_wttr_data (eWTTR_PRECIPI))));
+
+           return make_audio("weather", MAKE_AUDIO_WAIT) ? true : false;
         }
     }
     return false;
 }
 
 //------------------------------------------------------------------------------
-int main(int argc, char *argv[]) {
+void weather_info (void)
+{
+    struct tm t;
 
+    get_wttr_date (get_wttr_data (eWTTR_LOBS_DATE), &t);
+
+    printf ("측정시간 : ");
+    printf ("%s년 ", date_to_kor (eDAY_YEAR, (void *)&t));
+    printf ("%s월 ", date_to_kor (eDAY_MONTH, (void *)&t));
+    printf ("%s일 ", date_to_kor (eDAY_DAY, (void *)&t));
+    printf ("%s요일 ", date_to_kor (eDAY_W_DAY, (void *)&t));
+    printf ("%s ", date_to_kor (eDAY_AM_PM, (void *)&t));
+    printf ("%s시 ", date_to_kor (eDAY_HOUR, (void *)&t));
+    printf ("%s분\n", date_to_kor (eDAY_MIN, (void *)&t));
+
+    printf ("현재시간 : ");
+    printf ("%s년 ", date_to_kor (eDAY_YEAR, NULL));
+    printf ("%s월 ", date_to_kor (eDAY_MONTH, NULL));
+    printf ("%s일 ", date_to_kor (eDAY_DAY, NULL));
+    printf ("%s요일 ", date_to_kor (eDAY_W_DAY, NULL));
+    printf ("%s ", date_to_kor (eDAY_AM_PM, NULL));
+    printf ("%s시 ", date_to_kor (eDAY_HOUR, NULL));
+    printf ("%s분\n", date_to_kor (eDAY_MIN, NULL));
+
+    create_today_txt ();
+    create_time_txt  ();
+    create_weather_txt (get_wttr_data (eWTTR_LOBS_DATE));
+
+    printf ("\r\n ********** PLAY WEATHER AUDIO(KR) START **********\r\n");
+    play_audio ("today", 10);
+    play_audio ("time", 10);
+    play_audio ("weather", 30);
+    printf ("\r\n ********** PLAY WEATHER AUDIO(KR) END **********\r\n");
+}
+
+//------------------------------------------------------------------------------
+int main(int argc, char *argv[])
+{
+    struct tm t;
     char location [WTTR_DATA_SIZE];
 
     memset (location, 0, sizeof(location));
@@ -291,43 +370,19 @@ int main(int argc, char *argv[]) {
             city, country, 0);
 
         printf ("English : city(%s), country(%s)\n", city, country);
+        weather_info ();
 
-        char kor_str[WTTR_DATA_SIZE];
+        while (1) {
 
-        // void date_to_kor_buf (enum eDayItem d_item, void *i_time, char *k_str)
-        int_to_kor_buf (atoi(get_wttr_data (eWTTR_TEMP_FEEL)), kor_str);
-        printf ("체감온도 : %s도씨\n", kor_str);
+            get_local_date (&t);
 
-        {
-            struct tm t;
+            /* update every 10 min */
+            if ((t.tm_min % 10) == 0) {
+                if (update_weather_data (location))
+                    weather_info();
+            }
 
-            get_wttr_date (get_wttr_data (eWTTR_LOBS_DATE), &t);
-            // void date_to_kor     (enum eDayItem d_item, void *i_time, char *k_str)
-            printf ("측정시간 : ");
-            printf ("%s년 ", date_to_kor (eDAY_YEAR, (void *)&t));
-            printf ("%s월 ", date_to_kor (eDAY_MONTH, (void *)&t));
-            printf ("%s일 ", date_to_kor (eDAY_DAY, (void *)&t));
-            printf ("%s요일 ", date_to_kor (eDAY_W_DAY, (void *)&t));
-            printf ("%s ", date_to_kor (eDAY_AM_PM, (void *)&t));
-            printf ("%s시 ", date_to_kor (eDAY_HOUR, (void *)&t));
-            printf ("%s분\n", date_to_kor (eDAY_MIN, (void *)&t));
-
-            printf ("현재시간 : ");
-            printf ("%s년 ", date_to_kor (eDAY_YEAR, NULL));
-            printf ("%s월 ", date_to_kor (eDAY_MONTH, NULL));
-            printf ("%s일 ", date_to_kor (eDAY_DAY, NULL));
-            printf ("%s요일 ", date_to_kor (eDAY_W_DAY, NULL));
-            printf ("%s ", date_to_kor (eDAY_AM_PM, NULL));
-            printf ("%s시 ", date_to_kor (eDAY_HOUR, NULL));
-            printf ("%s분\n", date_to_kor (eDAY_MIN, NULL));
-
-            create_today_txt ();
-            create_time_txt  ();
-            create_weather_txt (get_wttr_data (eWTTR_LOBS_DATE));
-
-            play_audio ("today", 10);
-            play_audio ("time", 10);
-            play_audio ("weather", 30);
+            sleep (1);
         }
     }
     return 0;
