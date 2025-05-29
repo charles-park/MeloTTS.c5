@@ -250,7 +250,8 @@ int create_weather_txt (const char *cur_lobs)
     char city[WTTR_DATA_SIZE], country[WTTR_DATA_SIZE];
 
     /* 측정되어진 wttr 좌표 데이터*/
-    printf ("Lati : %s, Longi : %s\n", get_wttr_data (eWTTR_LATITUDE), get_wttr_data (eWTTR_LONGITUDE));
+    printf ("Lati : %s, Longi : %s, cur_lobs : %s, lobs : %s\n",
+        get_wttr_data (eWTTR_LATITUDE), get_wttr_data (eWTTR_LONGITUDE), cur_lobs, get_wttr_data (eWTTR_LOBS_DATE));
 
     if (strncmp (prev_lobs, cur_lobs, strlen (cur_lobs)) ||
         lati  != atof(get_wttr_data (eWTTR_LATITUDE))    ||
@@ -306,6 +307,7 @@ void weather_info (void)
 
     get_wttr_date (get_wttr_data (eWTTR_LOBS_DATE), &t);
 
+    printf ("Local OBS : %s\n", get_wttr_data (eWTTR_LOBS_DATE));
     printf ("측정시간 : ");
     printf ("%s년 ", date_to_kor (eDAY_YEAR, (void *)&t));
     printf ("%s월 ", date_to_kor (eDAY_MONTH, (void *)&t));
@@ -379,10 +381,11 @@ int main(int argc, char *argv[])
             get_local_date (&t);
 
             /* update every 10 min */
-            if ((t.tm_min % 10) == 0) {
+//            if ((t.tm_min % 10) == 0) {
+                printf ("location : %s\r\n", location);
                 if (update_weather_data (location))
                     weather_info();
-            }
+//            }
 
             sleep (1);
         }
