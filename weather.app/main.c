@@ -90,8 +90,9 @@ int play_audio (const char *fname, int wait_sec)
     sleep (1);
 
     while (wait_sec-- && PlayAudioEnable)   {
-        if ((wait_sec % 10) == 0 || (wait_sec < 10))
+        if (((wait_sec % 10) == 0) || (wait_sec < 10)) {
             printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
+        }
         sleep (1);
     }
 
@@ -152,8 +153,9 @@ int make_audio (const char *fname, int wait_sec)
     sleep (1);
 
     while (wait_sec-- && MakeAudioEnable)   {
-        if ((wait_sec % 10) == 0 || (wait_sec < 10))
+        if (((wait_sec % 10) == 0) || (wait_sec < 10)) {
             printf ("%s %s : wait %d sec\r\n", __func__, fname, wait_sec);  fflush(stdout);
+        }
         sleep (1);
     }
 
