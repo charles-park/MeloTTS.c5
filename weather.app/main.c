@@ -207,6 +207,7 @@ int create_today_txt (void)
         fprintf (fp, "%s요일 입니다.\n", date_to_kor (eDAY_W_DAY, NULL));
         fclose  (fp);
 
+        printf ("\n%s\n", __func__);
         printf ("오늘은 %s년 ", date_to_kor (eDAY_YEAR, NULL));
         printf ("%s월 ", date_to_kor (eDAY_MONTH, NULL));
         printf ("%s일 ", date_to_kor (eDAY_DAY, NULL));
@@ -223,16 +224,25 @@ int create_today_txt (void)
 int create_time_txt (void)
 {
     FILE *fp;
+    struct tm lt;
+
+    /* 현재 시간을 읽어와 분이 0인 경우 처리 */
+    get_local_date(&lt);
 
     if ((fp = fopen (TIME_TEXT, "wt")) != NULL) {
-        fprintf (fp, "현재시간은 %s ", date_to_kor (eDAY_AM_PM, NULL));
-        fprintf (fp, "%s시 ", date_to_kor (eDAY_HOUR, NULL));
-        fprintf (fp, "%s분 입니다.\n", date_to_kor (eDAY_MIN, NULL));
+        fprintf (fp, "현재시간은 %s ", date_to_kor (eDAY_AM_PM, (void *)&lt));
+        fprintf (fp, "%s시 ", date_to_kor (eDAY_HOUR, (void *)&lt));
+        if (lt.tm_min != 0)
+            fprintf (fp, "%s분 ", date_to_kor (eDAY_MIN, (void *)&lt));
+        fprintf (fp, "%s\n", "입니다.");
         fclose  (fp);
 
-        printf ("현재시간은 %s ", date_to_kor (eDAY_AM_PM, NULL));
-        printf ("%s시 ", date_to_kor (eDAY_HOUR, NULL));
-        printf ("%s분 입니다.\n", date_to_kor (eDAY_MIN, NULL));
+        printf ("\n%s\n", __func__);
+        printf ("현재시간은 %s ", date_to_kor (eDAY_AM_PM, (void *)&lt));
+        printf ("%s시 ", date_to_kor (eDAY_HOUR, (void *)&lt));
+        if (lt.tm_min != 0)
+            printf ("%s분 입니다.\n", date_to_kor (eDAY_MIN, (void *)&lt));
+        printf ("%s\n", "입니다.");
 
         return make_audio("time", MAKE_AUDIO_WAIT) ? true : false;
     } else {
@@ -250,8 +260,11 @@ int create_weather_txt (const char *cur_lobs)
     char city[WTTR_DATA_SIZE], country[WTTR_DATA_SIZE];
 
     /* 측정되어진 wttr 좌표 데이터*/
-    printf ("Lati : %s, Longi : %s, cur_lobs : %s, lobs : %s\n",
-        get_wttr_data (eWTTR_LATITUDE), get_wttr_data (eWTTR_LONGITUDE), cur_lobs, get_wttr_data (eWTTR_LOBS_DATE));
+    printf ("wttr.in DATA = Lati : %s, Longi : %s, lobs : %s\n",
+        get_wttr_data (eWTTR_LATITUDE), get_wttr_data (eWTTR_LONGITUDE), get_wttr_data (eWTTR_LOBS_DATE));
+
+    printf ("Local DATA   = Lati : %f, Longi : %f, cur_lobs : %s, prev_lobs : %s\n",
+        lati, longi, cur_lobs, prev_lobs);
 
     if (strncmp (prev_lobs, cur_lobs, strlen (cur_lobs)) ||
         lati  != atof(get_wttr_data (eWTTR_LATITUDE))    ||
@@ -284,6 +297,7 @@ int create_weather_txt (const char *cur_lobs)
 
            fclose  (fp);
 
+           printf ("\n%s\n", __func__);
            printf ("%s %s 날씨를 알려드립니다.\n", country, city);
            printf ("현재 날씨는 %s 입니다.\n", translate_weather_code( get_wttr_data (eWTTR_W_CODE), 1 ));
            printf ("온도는 %s도, ", int_to_kor (atoi( get_wttr_data (eWTTR_TEMP))));
