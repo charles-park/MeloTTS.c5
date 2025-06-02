@@ -242,7 +242,8 @@ int create_time_txt (void)
         printf ("%s시 ", date_to_kor (eDAY_HOUR, (void *)&lt));
         if (lt.tm_min != 0)
             printf ("%s분 입니다.\n", date_to_kor (eDAY_MIN, (void *)&lt));
-        printf ("%s\n", "입니다.");
+        else
+            printf ("%s\n", "입니다.");
 
         return make_audio("time", MAKE_AUDIO_WAIT) ? true : false;
     } else {
