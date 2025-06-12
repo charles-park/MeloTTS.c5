@@ -50,8 +50,14 @@ EOF
 // system reboot
 root@server:~# reboot
 
+// FB 나오지 않는 경우(필요한 package설치 및 drm관련 모니터 설정함)
+root@server:~# sudo apt install libdrm-meson libdrm-meson-dev -y
+root@server:~# drm_setcrtc -d meson -m 1920x720p60hz
+root@server:~# drm_setcrtc -d meson -m 800x480p60hz
+root@server:~# echo 0 | sudo tee /sys/devices/platform/drm-subsystem/graphics/fb0/blank
+
 root@server:~# uname -a
-Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 22 Apr 2025 09:19:01 +0000 aarch64 aarch64 aarch64 GNU/Linux
+Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 10 Jun 2025 05:13:57 +0000 aarch64 aarch64 aarch64 GNU/Linux
 
 ```
 
@@ -74,15 +80,21 @@ root@server:~/melotts.c5# git submodule update --init --recursive
 
 
 ### MeloTTS
-* Github : https://github.com/myshell-ai/MeloTTS (https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md)
-    - git clone https://github.com/myshell-ai/MeloTTS MeloTTS.lib
-
-* Docker 파일 수정 및 추가사항 (library.update folder안에 있는 모든 파일을 MeloTTS lib폴더안에 복사한다.)
+* MeloTTS Library 설치
+* Github 주소 : https://github.com/myshell-ai/MeloTTS (https://github.com/myshell-ai/MeloTTS/blob/main/docs/install.md)
+```
+// MeloTTS Library clone
+root@server:~# git clone https://github.com/myshell-ai/MeloTTS MeloTTS.lib
+```
+    
+* Docker 파일 수정 및 추가사항 업데이트 (melotts.c5/library.update folder안에 있는 모든 파일을 MeloTTS lib폴더안에 복사한다.)
+* Docker파일 수정내용
   - RUN pip install --upgrade pip
   - RUN pip install cached_pa#
+  - RUN python melo/init_downloads.py (주석처리 : 미리 다운로드, docker생성시 다운로드하는 경우 완료되지 않는 경우가 발생)
   - RUN pip install nltk
   - COPY nltk_data /app
-  - ENV NLTK_DATA=/app/nltk_datath==1.34.88 botocore==1.6.2
+  - ENV NLTK_DATA=/app/nltk_data
   - ENTRYPOINT ["python", "./mk_speech.py"]
 
 * RUN python melo/init_downloads.py를 주석처리(리소스부족의 문제로 nlk_data는 먼저 다운로드 하도록한다.)
@@ -90,11 +102,9 @@ root@server:~/melotts.c5# git submodule update --init --recursive
 #
 # ARM64에서 Docker image 작업중 nlk_data 다운로드시 리소스 문제로 정상적으로 동작하지 않는 경우가 생김
 #
-# RUN python melo/init_downloads.py
 #
 # init_downloads문제가 발생하여 수동으로 먼저 다운로드 후 PATH를 설정하여 사용하도록 수정함.
 #
-
 # nltk_data는 docker root 즉 Docker file이 있는 폴더 아래에 반드시 존재하여야 함.
 # 따라서 melo clone한 디렉토리 안에서 아래와 같이 실행하여 다운로드 함
 #
@@ -103,9 +113,9 @@ root@server:~/melotts.c5# git submodule update --init --recursive
 # mkdir -p ./nltk_data
 # python3 -m nltk.downloader -d ./nltk_data cmudict
 
-root@server:~/melotts.c5/weather.app/MeloTTS.lib# pip install nltk
-root@server:~/melotts.c5/weather.app/MeloTTS.lib# mkdir -p ./nltk_data
-root@server:~/melotts.c5/weather.app/MeloTTS.lib# python3 -m nltk.downloader -d ./nltk_data averaged_perceptron_tagger cmudict punkt wordnet
+root@server:~/MeloTTS.lib# pip install nltk
+root@server:~/MeloTTS.lib# mkdir -p ./nltk_data
+root@server:~/MeloTTS.lib# python3 -m nltk.downloader -d ./nltk_data averaged_perceptron_tagger cmudict punkt wordnet
 ```
 
 * Docker Build (kernel network package가 정상적으로 설치되지 않은 경우)
