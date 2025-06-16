@@ -50,7 +50,9 @@ EOF
 // system reboot
 root@server:~# reboot
 
+//
 // FB 나오지 않는 경우(필요한 package설치 및 drm관련 모니터 설정함)
+//
 root@server:~# sudo apt install libdrm-meson libdrm-meson-dev -y
 root@server:~# drm_setcrtc -d meson -m 1920x720p60hz
 root@server:~# drm_setcrtc -d meson -m 800x480p60hz
@@ -58,6 +60,50 @@ root@server:~# echo 0 | sudo tee /sys/devices/platform/drm-subsystem/graphics/fb
 
 root@server:~# uname -a
 Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 10 Jun 2025 05:13:57 +0000 aarch64 aarch64 aarch64 GNU/Linux
+
+//
+// Docker지원 버전 (iptable관련 포함, Docker build시 host option제거, daemon.json파일 생성 필요 없음)
+//
+root@server:~# apt update
+root@server:~# apt install linux-image-5.15.153-odroid-arm64
+root@server:~# dpkg -l | grep linux-image-5.15
+ii  linux-image-5.15.153-odroid-arm64 5.15.153-202506121403~noble             arm64        Linux 5.15 for ODROID (64-bit ARMv8 machines)
+
+root@server:~# uname -a
+Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Thu, 12 Jun 2025 05:14:22 +0000 aarch64 aarch64 aarch64 GNU/Linux
+
+// /etc/modules-load.d/docker.conf 파일 생성 및 아래 모듈 등록
+root@server:~# vi /etc/modules-load.d/docker.conf
+ip_tables
+nf_tables
+nf_conntrack
+
+iptable_filter
+ip6table_filter
+iptable_mangle
+ip6table_mangle
+iptable_nat
+ip6table_nat
+iptable_raw
+ip6table_raw
+
+br_netfilter
+
+xfrm_user
+xt_tcp
+xt_udp
+xt_limit
+xt_MASQUERADE
+xt_conntrack
+xt_addrtype
+
+
+// iptable관련 업데이트
+root@server:~# apt update
+root@server:~# apt install docker.io
+root@server:~# usermod -a -G docker odroid
+root@server:~# update-alternatives --set iptables /usr/sbin/iptables-legacy
+root@server:~# update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 
 ```
 
