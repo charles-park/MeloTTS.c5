@@ -35,11 +35,15 @@ root@server:~# echo \
   $(lsb_release -cs) stable" | \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-// Docker 엔진설치
+// Docker 엔진설치 (docker.io는 더이상 사용하지 않으므로 이미 설치하였다면 삭제하여야 함)
+// 기존 docker.io삭제
+// # for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
+// # apt autoremove
 root@server:~# apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 // Docker network(iptable) 관련설정이 없거나 지원하지 않는 경우(ODROID-C5는 지원하지 않음)
 // 이 경우 docker실행시 --network=host명령을 주어 host의 network을 사용하도록 함.
+// update 20250617 : 최신 커널에는 반영됨. module list가 modprobe.d에 설정되어야 함(모듈 파일작성 내용 참고)
 root@server:~# mkdir -p /etc/docker
 root@server:~# tee /etc/docker/daemon.json > /dev/null <<EOF
 {
@@ -100,11 +104,13 @@ xt_addrtype
 
 // iptable관련 업데이트
 root@server:~# apt update
-root@server:~# apt install docker.io
 root@server:~# usermod -a -G docker odroid
 root@server:~# update-alternatives --set iptables /usr/sbin/iptables-legacy
 root@server:~# update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+root@server:~# reboot
 
+// docker 동작 확인
+root@server:~# cat /var/log/syslog | grep dockerd
 ```
 
 ### Github setting
