@@ -25,7 +25,7 @@ root@server:~# apt install -y \
 
 // Docker 공식 GPG 키 추가
 root@server:~# mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+root@server:~# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
     gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
 // Docker 리포지터리 추가 (arm64 지원 포함)
@@ -71,10 +71,10 @@ Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Tue, 10 Jun 2025 05:13:57 +000
 root@server:~# apt update
 root@server:~# apt install linux-image-5.15.153-odroid-arm64
 root@server:~# dpkg -l | grep linux-image-5.15
-ii  linux-image-5.15.153-odroid-arm64 5.15.153-202506121403~noble             arm64        Linux 5.15 for ODROID (64-bit ARMv8 machines)
+ii  linux-image-5.15.153-odroid-arm64 5.15.153-202506201401~jammy             arm64        Linux 5.15 for ODROID (64-bit ARMv8 machines)
 
 root@server:~# uname -a
-Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Thu, 12 Jun 2025 05:14:22 +0000 aarch64 aarch64 aarch64 GNU/Linux
+Linux server 5.15.153-odroid-arm64 #1 SMP PREEMPT Fri, 20 Jun 2025 05:13:45 +0000 aarch64 aarch64 aarch64 GNU/Linux
 
 // /etc/modules-load.d/docker.conf 파일 생성 및 아래 모듈 등록
 root@server:~# vi /etc/modules-load.d/docker.conf
